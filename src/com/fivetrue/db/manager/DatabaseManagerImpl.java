@@ -17,6 +17,7 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 	protected DatabaseManagerImpl(String server, String dbName, String id, String password){
 		mDbHelper = new DatabaseHelper<T>(server, dbName, 
 				id, password);
+		createDatabase(getDefaultData());
 	}
 	
 	public DatabaseHelper<T> getDatabaseHelper(){
@@ -114,6 +115,28 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 		return msg;
 	}
 	
+	public DBMessage createDatabase(DatabaseObject object){
+		
+		DBMessage msg = new DBMessage();
+		Connection conn = getDatabaseHelper().connectDatabase();
+		if(object != null && conn != null){
+			PreparedStatement ps = null;
+			
+			String query = object.createQuery(getDatabaseHelper().getDatabaseName());
+			System.out.println("ojkwon update : create = " + query);
+			try {
+				ps = conn.prepareStatement(query);
+				msg.setRow(ps.executeUpdate());
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				msg.setMessage(e1.getMessage());
+			}
+			getDatabaseHelper().disconnectDatabase(conn);
+		}
+		return msg;
+	}
+	
 //	public String getSelectQuery(String[] selection, String[] where){
 	public String getSelectQuery(String[] selection, String where){
 		return QueryBuilder.newInstance().selectQuery(getDatabaseObjectClass(), selection, where);
@@ -127,4 +150,30 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 	
 	protected abstract Class <? extends T> getDatabaseObjectClass();
 	
+	public abstract T getDefaultData();
+	
+//	public boolean isTableExists(){
+//		Connection conn = getDatabaseHelper().connectRootDatabase();
+//		int count = 0;
+//		if(conn != null){
+//			String query = "SELECT COUNT(*) "
+//					+ "FROM information_schema.tables "
+//					+ "WHERE table_schema='" + getDatabaseHelper().getDatabaseName() +"' AND table_name='"+ getDatabaseObjectClass().getSimpleName().toLowerCase() +"'";
+//			System.out.println("isTableExists = " + query);
+//			PreparedStatement pstmt = null;
+//			try {
+//				pstmt = conn.prepareStatement(query);
+//				ResultSet rs = pstmt.executeQuery();
+//				
+//				count = rs.getInt(0);
+//			} catch (SQLException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} finally{
+//				getDatabaseHelper().disconnectDatabase(conn);
+//			}
+//		}
+//	    return count > 0;
+//	}
+//	
 }

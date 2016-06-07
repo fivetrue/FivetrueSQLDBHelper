@@ -35,6 +35,10 @@ public class DatabaseObject {
 		return QueryBuilder.newInstance(); 
 	}
 	
+	public String createQuery(String dbName){
+		return makeBuilder().createQuery(dbName, this);
+	}
+	
 	/**
 	 * Insert Query를 생성하여 준다.
 	 */
@@ -90,6 +94,18 @@ public class DatabaseObject {
 			}
 			this.relationDatas.add(data);
 			return this;
+		}
+		
+		/**
+		 * 
+		 * @param data
+		 * @return
+		 */
+		public String createQuery(String dbName, DatabaseObject data){
+			query = makeCreateQuery(dbName, data);
+			String q = query.toString();
+			query = null;
+			return q;
 		}
 		
 		/**
@@ -315,6 +331,43 @@ public class DatabaseObject {
 				}
 			}
 			return fs;
+		}
+		
+		/**
+		 * Create table query 생성
+		 * @param data
+		 * @return
+		 */
+		private StringBuilder makeCreateQuery(String dbName, DatabaseObject data){
+			StringBuilder sb = new StringBuilder();
+			sb.append("CREATE TABLE IF NOT EXISTS ")
+			.append("`" + dbName + "`.")
+			.append("`" + data.getClass().getSimpleName().toLowerCase() + "`")
+			.append("(");
+			
+			Field[] fields = data.getClass().getDeclaredFields();
+			for(Field f : fields){
+				if(!checkMemberVarable(f)){
+					if(checkAutoIncrement(f)){
+						sb.append(" `" + f.getName() + "` ")
+						.append(getDataType(f) + " AUTO_INCREMENT,");
+					}else{
+						sb.append(" `" + f.getName() + "` ")
+						.append(getDataType(f) + ",");
+					}
+				}
+			}
+			
+			ArrayList<Field> fs = findPrimaryKey(data);
+			if(fs != null && fs.size() > 0){
+				sb.append("PRIMARY KEY (`" + fs.get(0).getName() + ")");
+			}else{
+				if(sb.charAt(sb.length() - 1) == ','){
+					sb.replace(sb.length() - 1, sb.length(), "");
+				}
+				sb.append(");");
+			}
+			return sb;
 		}
 		
 		private StringBuilder makeInsertQuery(DatabaseObject data){
@@ -554,6 +607,27 @@ public class DatabaseObject {
 			boolean b = false;
 			f.setAccessible(true);
 			return f != null && f.getAnnotation(MemberVariable.class) != null;
+		}
+		
+		private boolean checkAutoIncrement(Field f){
+			boolean b = false;
+			f.setAccessible(true);
+			return f != null && f.getAnnotation(AutoIncrement.class) != null;
+		}
+		
+		private String getDataType(Field f){
+			String type = null;
+			f.setAccessible(true);
+			String typeName = f.getType().toString();
+			if(typeName.contains("String")){
+				type = "VARCHAR(256)";
+			}else if(typeName.contains("Integer") || typeName.contains("int")){
+				type = "INT";
+			}else if(typeName.contains("Long") || typeName.contains("long")
+					|| typeName.contains("Float") || typeName.contains("float")){
+				type = "BIGINT(12)";
+			}
+			return type;
 		}
 	}
 }
