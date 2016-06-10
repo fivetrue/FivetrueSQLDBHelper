@@ -360,13 +360,13 @@ public class DatabaseObject {
 			
 			ArrayList<Field> fs = findPrimaryKey(data);
 			if(fs != null && fs.size() > 0){
-				sb.append("PRIMARY KEY (`" + fs.get(0).getName() + ")");
+				sb.append("PRIMARY KEY (`" + fs.get(0).getName() + "`)");
 			}else{
 				if(sb.charAt(sb.length() - 1) == ','){
 					sb.replace(sb.length() - 1, sb.length(), "");
 				}
-				sb.append(");");
 			}
+			sb.append(");");
 			return sb;
 		}
 		

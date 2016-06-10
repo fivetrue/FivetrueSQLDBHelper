@@ -30,7 +30,7 @@ public abstract class BaseApiHandler {
 			e.printStackTrace();
 		}
 		
-		checkRequestValidation();
+//		checkRequestValidation();
 	}
 	
 	protected boolean checkRequestValidation(){

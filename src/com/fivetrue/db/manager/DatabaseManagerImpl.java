@@ -17,7 +17,7 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 	protected DatabaseManagerImpl(String server, String dbName, String id, String password){
 		mDbHelper = new DatabaseHelper<T>(server, dbName, 
 				id, password);
-		createDatabase(getDefaultData());
+//		createDatabase(getDefaultData());
 	}
 	
 	public DatabaseHelper<T> getDatabaseHelper(){
@@ -57,17 +57,19 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 	public DBMessage insertObject(DatabaseObject data){
 		DBMessage msg = new DBMessage();
 		Connection conn = getDatabaseHelper().connectDatabase();
-		if(data != null && conn != null){
-			PreparedStatement ps = null;
-			String query = data.insertQuery();
-			System.out.println("ojkwon insertObject : query = " + query);
-			try {
-				ps = conn.prepareStatement(query);
-				msg.setRow(ps.executeUpdate());
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				msg.setMessage(e1.getMessage());
+		if(conn != null){
+			if(data != null){
+				PreparedStatement ps = null;
+				String query = data.insertQuery();
+				System.out.println("ojkwon insertObject : query = " + query);
+				try {
+					ps = conn.prepareStatement(query);
+					msg.setRow(ps.executeUpdate());
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					msg.setMessage(e1.getMessage());
+				}
 			}
 			getDatabaseHelper().disconnectDatabase(conn);
 		}
@@ -77,17 +79,19 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 	public DBMessage removeObject(DatabaseObject data){
 		DBMessage msg = new DBMessage();
 		Connection conn = getDatabaseHelper().connectDatabase();
-		if(data != null && conn != null){
-			PreparedStatement ps = null;
-			String query = data.deleteQuery();
-			System.out.println("ojkwon removeObject : query = " + query);
-			try {
-				ps = conn.prepareStatement(query);
-				msg.setRow(ps.executeUpdate());
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				msg.setMessage(e1.getMessage());
+		if(conn != null){
+			if(data != null){
+				PreparedStatement ps = null;
+				String query = data.deleteQuery();
+				System.out.println("ojkwon removeObject : query = " + query);
+				try {
+					ps = conn.prepareStatement(query);
+					msg.setRow(ps.executeUpdate());
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					msg.setMessage(e1.getMessage());
+				}
 			}
 			getDatabaseHelper().disconnectDatabase(conn);
 		}
@@ -98,17 +102,19 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 	public DBMessage updateObject(DatabaseObject data){
 		DBMessage msg = new DBMessage();
 		Connection conn = getDatabaseHelper().connectDatabase();
-		if(data != null && conn != null){
-			PreparedStatement ps = null;
-			String query = data.updateQuery();
-			System.out.println("ojkwon update : query = " + query);
-			try {
-				ps = conn.prepareStatement(query);
-				msg.setRow(ps.executeUpdate());
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				msg.setMessage(e1.getMessage());
+		if(conn != null){
+			if(data != null){
+				PreparedStatement ps = null;
+				String query = data.updateQuery();
+				System.out.println("ojkwon update : query = " + query);
+				try {
+					ps = conn.prepareStatement(query);
+					msg.setRow(ps.executeUpdate());
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					msg.setMessage(e1.getMessage());
+				}
 			}
 			getDatabaseHelper().disconnectDatabase(conn);
 		}
@@ -119,21 +125,23 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 		
 		DBMessage msg = new DBMessage();
 		Connection conn = getDatabaseHelper().connectDatabase();
-		if(object != null && conn != null){
-			PreparedStatement ps = null;
-			
-			String query = object.createQuery(getDatabaseHelper().getDatabaseName());
-			System.out.println("ojkwon update : create = " + query);
-			try {
-				ps = conn.prepareStatement(query);
-				msg.setRow(ps.executeUpdate());
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				msg.setMessage(e1.getMessage());
+		if(conn != null){
+			if(object != null){
+				PreparedStatement ps = null;
+				
+				String query = object.createQuery(getDatabaseHelper().getDatabaseName());
+				System.out.println("ojkwon update : create = " + query);
+				try {
+					ps = conn.prepareStatement(query);
+					msg.setRow(ps.executeUpdate());
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					msg.setMessage(e1.getMessage());
+				}
 			}
-			getDatabaseHelper().disconnectDatabase(conn);
 		}
+		getDatabaseHelper().disconnectDatabase(conn);
 		return msg;
 	}
 	
