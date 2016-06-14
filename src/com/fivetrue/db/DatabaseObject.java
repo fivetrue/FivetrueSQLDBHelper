@@ -12,6 +12,7 @@ import com.fivetrue.db.annotation.ForeignKey;
 import com.fivetrue.db.annotation.MemberVariable;
 import com.fivetrue.db.annotation.Password;
 import com.fivetrue.db.annotation.PrimaryKey;
+import com.fivetrue.db.annotation.StringLength;
 import com.fivetrue.utils.TextUtils;
 
 /**
@@ -620,7 +621,13 @@ public class DatabaseObject {
 			f.setAccessible(true);
 			String typeName = f.getType().toString();
 			if(typeName.contains("String")){
-				type = "VARCHAR(256)";
+				StringLength stringLength = f.getAnnotation(StringLength.class);
+				if(stringLength != null){
+					type = "VARCHAR("+ stringLength.value() +")";
+				}else{
+					type = "VARCHAR(256)";
+					
+				}
 			}else if(typeName.contains("Integer") || typeName.contains("int")){
 				type = "INT";
 			}else if(typeName.contains("Long") || typeName.contains("long")

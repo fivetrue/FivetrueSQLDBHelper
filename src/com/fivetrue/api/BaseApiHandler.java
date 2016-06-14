@@ -1,15 +1,27 @@
 package com.fivetrue.api;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javafx.util.Pair;
+
 
 public abstract class BaseApiHandler {
+	
+	private static final String TAG = "BaseApiHandler";
 	
 	private HttpServletRequest mRequest = null;
 	private HttpServletResponse mResponse = null;
@@ -83,5 +95,70 @@ public abstract class BaseApiHandler {
 	
 	public ServletContext getContext(){
 		return mContext;
+	}
+	
+	protected String requestApi(String api, String method, boolean userCaches, Pair<String, String>[] headers, Pair<String, String>...parameters){
+		String response = "";
+		try {
+			boolean hasoutbody = method.equalsIgnoreCase("POST");
+            final URL url = new URL(api);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            
+            if(headers != null){
+            	for(Pair<String, String> header : headers){
+            		conn.addRequestProperty(header.getKey(), header.getValue());
+            	}
+            }
+
+            conn.setUseCaches(userCaches);
+            conn.setDoInput(true);
+            conn.setDoOutput(hasoutbody);
+            conn.connect();
+            
+            if(hasoutbody && parameters != null){
+            	OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+            	writer.write(getPostDataString(parameters));
+            	writer.flush();
+                writer.close();
+                os.close();
+            }
+            
+            int responseCode =conn.getResponseCode();
+//            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                String line;
+                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                while ((line=br.readLine()) != null) {
+                    response+=line;
+                }
+//            }else {
+//                response="";
+//            }
+                
+                getContext().log(TAG + " : requestAPi ("
+                		+ "responseCode = " + responseCode + " / "
+                		+ "api = " + api + " / "
+                		+ "method = " + method + " / "
+                		+ "parameter = " + parameters + " / "
+                				+ "response = " + response + " / "
+                				+ ")" );
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return response;
+	}
+	
+	private String getPostDataString(Pair<String, String>[] pairs){
+		String data = "";
+		if(pairs != null && pairs.length > 0){
+			for(Pair<String, String> p : pairs){
+				data += p.getKey() + "=" + p.getValue() + "&"; 
+			}
+		}
+		return data;
+		
 	}
 }
