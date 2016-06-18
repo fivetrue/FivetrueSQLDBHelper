@@ -97,7 +97,11 @@ public abstract class BaseApiHandler {
 		return mContext;
 	}
 	
-	protected String requestApi(String api, String method, boolean userCaches, Pair<String, String>[] headers, Pair<String, String>...parameters){
+	public static String requestApi(String api, String method, boolean userCaches, Pair<String, String>[] headers, Pair<String, String>...parameters){
+		return requestApi(api, method, userCaches, headers, getPostDataString(parameters));
+	}
+	
+	public static String requestApi(String api, String method, boolean userCaches, Pair<String, String>[] headers, String data){
 		String response = "";
 		try {
 			boolean hasoutbody = method.equalsIgnoreCase("POST");
@@ -116,14 +120,16 @@ public abstract class BaseApiHandler {
             conn.setDoOutput(hasoutbody);
             conn.connect();
             
-            if(hasoutbody && parameters != null){
-            	OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-            	writer.write(getPostDataString(parameters));
-            	writer.flush();
-                writer.close();
-                os.close();
+            if(hasoutbody){
+            	if(data != null && data.length() > 0){
+            		OutputStream os = conn.getOutputStream();
+            		BufferedWriter writer = new BufferedWriter(
+            				new OutputStreamWriter(os, "UTF-8"));
+            		writer.write(data);
+            		writer.flush();
+            		writer.close();
+            		os.close();
+            	}
             }
             
             int responseCode =conn.getResponseCode();
@@ -137,13 +143,13 @@ public abstract class BaseApiHandler {
 //                response="";
 //            }
                 
-                getContext().log(TAG + " : requestAPi ("
-                		+ "responseCode = " + responseCode + " / "
-                		+ "api = " + api + " / "
-                		+ "method = " + method + " / "
-                		+ "parameter = " + parameters + " / "
-                				+ "response = " + response + " / "
-                				+ ")" );
+//                getContext().log(TAG + " : requestAPi ("
+//                		+ "responseCode = " + responseCode + " / "
+//                		+ "api = " + api + " / "
+//                		+ "method = " + method + " / "
+//                		+ "parameter = " + parameters + " / "
+//                				+ "response = " + response + " / "
+//                				+ ")" );
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -151,7 +157,7 @@ public abstract class BaseApiHandler {
 		return response;
 	}
 	
-	private String getPostDataString(Pair<String, String>[] pairs){
+	public static String getPostDataString(Pair<String, String>[] pairs){
 		String data = "";
 		if(pairs != null && pairs.length > 0){
 			for(Pair<String, String> p : pairs){
