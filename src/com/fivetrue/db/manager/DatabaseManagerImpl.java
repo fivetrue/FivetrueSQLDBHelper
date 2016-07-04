@@ -9,6 +9,7 @@ import com.fivetrue.db.DBMessage;
 import com.fivetrue.db.DatabaseHelper;
 import com.fivetrue.db.DatabaseObject;
 import com.fivetrue.db.DatabaseObject.QueryBuilder;
+import com.fivetrue.utils.TextUtils;
 
 public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 
@@ -48,7 +49,7 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 		return sb;
 	}
 
-	protected ArrayList<T> rawQuery(String query){
+	public ArrayList<T> rawQuery(String query){
 		System.out.println("ojkwon : rawQuery : query = " + query);
 		ArrayList<T> datas = getDatabaseHelper().rawSelectQuery(query, getDatabaseObjectClass());
 		return datas;
@@ -183,6 +184,17 @@ public abstract class DatabaseManagerImpl <T extends DatabaseObject> {
 	public ArrayList<T> getSelectQueryData(String[] selection, String where){
 		String query = QueryBuilder.newInstance().selectQuery(getDatabaseObjectClass(), selection, where);
 		return rawQuery(query);
+	}
+	
+	public int getCountData(String where){
+		String query = "SELECT COUNT(*) "
+				+ " FROM " + getDatabaseObjectClass().getSimpleName().toLowerCase();
+		if(!TextUtils.isEmpty(where)){
+			query += " WHERE " + where;
+		}
+		query += ";";
+					
+		return getDatabaseHelper().rawCountQuery(query);
 	}
 
 	protected abstract Class <? extends T> getDatabaseObjectClass();

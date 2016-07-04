@@ -5,7 +5,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+
+import com.fivetrue.utils.TextUtils;
 
 public class DatabaseHelper <T> {
 	
@@ -44,6 +47,29 @@ public class DatabaseHelper <T> {
 		mDbUrl = mDbRootUrl + mDbName;         
 		mDbUserId = id;
 		mDbUserPass = pass;
+	}
+	
+	public int rawCountQuery (String query){
+		int count = 0;
+		Connection conn = connectDatabase();
+		if(query != null && conn != null){
+			Statement stmt = null;
+			try {
+				stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(query);
+				while(rs.next()){
+					count = rs.getInt(1);
+				}
+				rs.close();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} finally{
+				disconnectDatabase(conn);
+			}
+		}
+		System.out.println(query + " = " + count);
+		return count;
 	}
 	
 	public ArrayList<T> rawSelectQuery(String query, Class <? extends DatabaseObject> cls){
